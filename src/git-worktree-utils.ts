@@ -14,7 +14,7 @@ import { $ } from "zx";
 export async function validateGitRepository(): Promise<void> {
   try {
     await $`git rev-parse --git-dir`;
-  } catch (error) {
+  } catch (_error) {
     throw new Error("Not in a git repository");
   }
 }
@@ -43,7 +43,7 @@ export async function discoverMainBranch(): Promise<string> {
         return defaultBranch;
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // Remote HEAD not available, continue with other methods
   }
 
@@ -54,13 +54,13 @@ export async function discoverMainBranch(): Promise<string> {
       await $`git show-ref --verify --quiet refs/heads/${branchName}`;
       console.log(`Using main branch: ${branchName}`);
       return branchName;
-    } catch (error) {
+    } catch (_error) {
       // Branch doesn't exist locally, try remote
       try {
         await $`git show-ref --verify --quiet refs/remotes/origin/${branchName}`;
         console.log(`Using main branch: ${branchName} (from remote)`);
         return branchName;
-      } catch (remoteError) {
+      } catch (_remoteError) {
         // Branch doesn't exist remotely either, continue
       }
     }
@@ -78,7 +78,7 @@ export async function discoverMainBranch(): Promise<string> {
       console.log(`Using fallback branch: ${firstBranch}`);
       return firstBranch;
     }
-  } catch (error) {
+  } catch (_error) {
     // If all else fails, use 'main'
   }
 
@@ -124,11 +124,13 @@ export function determineWorktreeBase(worktreePaths: string[]): string {
  * @param branchName Name of the branch to check
  * @returns True if branch exists locally
  */
-export async function branchExistsLocally(branchName: string): Promise<boolean> {
+export async function branchExistsLocally(
+  branchName: string
+): Promise<boolean> {
   try {
     await $`git show-ref --verify --quiet refs/heads/${branchName}`;
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }
@@ -147,7 +149,9 @@ export function getCurrentDirectory(): string {
  * @returns Current branch name
  */
 export async function getCurrentBranch(path?: string): Promise<string> {
-  const command = path ? $`git -C ${path} branch --show-current` : $`git branch --show-current`;
+  const command = path
+    ? $`git -C ${path} branch --show-current`
+    : $`git branch --show-current`;
   const result = await command;
   return result.stdout.trim();
 }
@@ -160,16 +164,16 @@ export async function isCurrentDirectoryWorktree(): Promise<boolean> {
   try {
     // Get the current directory
     const currentDir = getCurrentDirectory();
-    
+
     // Get all worktree paths
     const worktreePaths = await getWorktreePaths();
-    
+
     // Determine which is the main repository (base)
     const worktreeBase = determineWorktreeBase(worktreePaths);
-    
+
     // Check if current directory is not the main repository
     return currentDir !== worktreeBase && worktreePaths.includes(currentDir);
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

@@ -3,7 +3,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { $ } from "zx";
 
 async function main() {
   const zshrcPath = join(homedir(), ".zshrc");

@@ -35,7 +35,7 @@ async function askForConfirmation(message: string): Promise<boolean> {
     // Use zx question helper for interactive prompts
     const answer = await question(`${message} (y/N): `);
     return answer.toLowerCase() === "y" || answer.toLowerCase() === "yes";
-  } catch (error) {
+  } catch (_error) {
     // If user cancels (Ctrl+C), treat as "no"
     return false;
   }
@@ -98,9 +98,11 @@ async function main() {
     console.log(`🌿 Switching to main branch: ${mainBranch}`);
     try {
       await $`git checkout ${mainBranch}`;
-    } catch (checkoutError) {
+    } catch (_checkoutError) {
       // If main branch is already checked out in another worktree, use detached HEAD instead
-      console.log(`⚠️  Main branch is checked out elsewhere, using detached HEAD instead`);
+      console.log(
+        "⚠️  Main branch is checked out elsewhere, using detached HEAD instead"
+      );
       await $`git checkout --detach ${mainBranch}`;
     }
 
@@ -126,13 +128,13 @@ async function main() {
           `💡 Tip: You might want to switch to the main branch (${mainBranch})`
         );
       }
-    } catch (branchError) {
+    } catch (_branchError) {
       // If we can't get the current branch, that's okay - just continue
       console.log("🌿 Switched to main repository");
     }
   } catch (error) {
     console.log("❌ Error removing worktree:");
-    console.error(error.message);
+    console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }

@@ -2,13 +2,13 @@
 
 import { $ } from "zx";
 import {
-  validateGitRepository,
-  discoverMainBranch,
-  getWorktreePaths,
-  determineWorktreeBase,
   branchExistsLocally,
+  determineWorktreeBase,
+  discoverMainBranch,
   getCurrentBranch,
-  switchToDirectory
+  getWorktreePaths,
+  switchToDirectory,
+  validateGitRepository,
 } from "./git-worktree-utils.js";
 
 /**
@@ -25,7 +25,6 @@ import {
  * - Maintains the same directory structure as the original shell script
  */
 
-
 /**
  * Switches to an existing worktree and shows status
  * @param targetPath Path to the existing worktree
@@ -36,7 +35,7 @@ async function switchToExistingWorktree(targetPath: string): Promise<void> {
   // Show current branch from the worktree directory
   const currentBranch = await getCurrentBranch(targetPath);
   console.log(`On branch: ${currentBranch}`);
-  
+
   // Output the target path for the shell wrapper to use
   switchToDirectory(targetPath);
 }
@@ -55,7 +54,7 @@ async function createWorktreeWithExistingBranch(
 
   const currentBranch = await getCurrentBranch(targetPath);
   console.log(`On branch: ${currentBranch}`);
-  
+
   // Output the target path for the shell wrapper to use
   switchToDirectory(targetPath);
 }
@@ -77,7 +76,7 @@ async function createWorktreeWithNewBranch(
 
   const currentBranch = await getCurrentBranch(targetPath);
   console.log(`On branch: ${currentBranch}`);
-  
+
   // Output the target path for the shell wrapper to use
   switchToDirectory(targetPath);
 }
@@ -133,7 +132,7 @@ async function main() {
     }
   } catch (error) {
     console.log("Error managing worktree:");
-    console.error(error.message);
+    console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }
