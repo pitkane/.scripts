@@ -94,6 +94,16 @@ async function main() {
     process.chdir(worktreeBase);
     console.log(`📂 Changed to main repository: ${worktreeBase}`);
 
+    // Switch to main branch before removing worktree, handling case where it's already checked out elsewhere
+    console.log(`🌿 Switching to main branch: ${mainBranch}`);
+    try {
+      await $`git checkout ${mainBranch}`;
+    } catch (checkoutError) {
+      // If main branch is already checked out in another worktree, use detached HEAD instead
+      console.log(`⚠️  Main branch is checked out elsewhere, using detached HEAD instead`);
+      await $`git checkout --detach ${mainBranch}`;
+    }
+
     // Remove the worktree
     console.log(`🗑️  Removing worktree: ${currentDir}`);
     await $`git worktree remove ${currentDir} --force`;

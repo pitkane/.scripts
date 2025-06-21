@@ -84,20 +84,31 @@ gwtremove() {
         # Force mode - no interaction needed
         output=$(pnpx tsx /Users/mikko/.scripts/src/git-worktree-remove.ts $force_flag 2>&1)
     else
-        # Interactive mode - run directly without capturing output first for prompts
-        # The TypeScript script will handle changing to main repo before removal
+        # Interactive mode - get main branch worktree path before removal
+        local main_branch_path
+        local worktree_list=$(git worktree list 2>/dev/null)
+        if [ $? -eq 0 ]; then
+            # Find the main branch (try dev, main, master in order)
+            for branch in "dev" "main" "master"; do
+                main_branch_path=$(echo "$worktree_list" | grep "\\[$branch\\]" | awk '{print $1}')
+                if [ -n "$main_branch_path" ]; then
+                    break
+                fi
+            done
+            
+            # If no main branch found, fall back to shortest path (main repo)
+            if [ -z "$main_branch_path" ]; then
+                main_branch_path=$(echo "$worktree_list" | awk '{print $1}' | awk 'length < length(shortest) || NR==1 {shortest=$0} END {print shortest}')
+            fi
+        fi
+        
+        # Run the TypeScript script directly for interactive prompts
         pnpx tsx /Users/mikko/.scripts/src/git-worktree-remove.ts
         local exit_code=$?
         
-        # If successful, change to main repository in the shell
-        if [ $exit_code -eq 0 ]; then
-            # Get the main repository path
-            local worktree_paths=$(git worktree list)
-            local main_repo_path=$(echo "$worktree_paths" | awk '{print $1}' | awk 'length < length(shortest) || NR==1 {shortest=$0} END {print shortest}')
-            
-            if [ -d "$main_repo_path" ]; then
-                cd "$main_repo_path"
-            fi
+        # If successful and we have a main branch path, change to it
+        if [ $exit_code -eq 0 ] && [ -n "$main_branch_path" ] && [ -d "$main_branch_path" ]; then
+            cd "$main_branch_path"
         fi
         
         return $exit_code
@@ -118,9 +129,29 @@ gwtremove() {
                 echo "$filtered_output"
             fi
             
-            # Change to the worktree directory if path was provided
-            if [ -n "$worktree_path" ] && [ -d "$worktree_path" ]; then
-                cd "$worktree_path"
+            # Try to find main branch worktree instead of just using the provided path
+            local main_branch_path
+            local worktree_list=$(git worktree list 2>/dev/null)
+            if [ $? -eq 0 ]; then
+                # Find the main branch (try dev, main, master in order)
+                for branch in "dev" "main" "master"; do
+                    main_branch_path=$(echo "$worktree_list" | grep "\\[$branch\\]" | awk '{print $1}')
+                    if [ -n "$main_branch_path" ]; then
+                        break
+                    fi
+                done
+                
+                # If no main branch found, use the provided worktree path
+                if [ -z "$main_branch_path" ]; then
+                    main_branch_path="$worktree_path"
+                fi
+            else
+                main_branch_path="$worktree_path"
+            fi
+            
+            # Change to the main branch worktree directory
+            if [ -n "$main_branch_path" ] && [ -d "$main_branch_path" ]; then
+                cd "$main_branch_path"
             fi
             
             return 0
