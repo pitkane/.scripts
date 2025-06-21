@@ -4,7 +4,7 @@ import { $ } from 'zx';
 
 /**
  * Git Worktree Tab Completion Script
- * Provides intelligent tab completion for the gwt command
+ * Provides intelligent tab completion for the gwtadd command
  * 
  * Returns a list of available worktree names and branch names
  * that can be used for completion in the shell
