@@ -11,7 +11,8 @@
     "script:git-worktree-completion": "pnpx tsx ./src/git-worktree-completion.ts",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint",
-    "lint:fix": "biome lint --write"
+    "lint:fix": "biome lint --write",
+    "test": "pnpx tsx ./src/test-worktrees.ts"
   },
   "packageManager": "pnpm@10.12.1",
   "devDependencies": {
