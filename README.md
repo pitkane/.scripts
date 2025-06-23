@@ -1,8 +1,15 @@
-# Git Worktree Management Scripts
+# Personal Scripts Collection
 
-A collection of shell scripts that make working with Git worktrees simple and intuitive.
+🚧 **Work in Progress** 🚧
 
-## What are Git Worktrees?
+A collection of my personal scripts and utilities for productivity and development workflow automation.
+
+## Current Scripts
+
+### Git Worktree Management
+Scripts that make working with Git worktrees simple and intuitive.
+
+#### What are Git Worktrees?
 
 Git worktrees allow you to have multiple working directories from the same Git repository. Instead of switching branches and losing your current work, you can have different branches checked out in separate folders simultaneously.
 
@@ -25,7 +32,7 @@ git checkout main
 /my-project/hotfix   <- hotfix branch
 ```
 
-## Installation
+#### Installation
 
 1. Clone this repository to your preferred location (e.g., `~/.scripts`)
 2. Install dependencies:
@@ -43,9 +50,9 @@ git checkout main
    source ~/.zshrc  # or source ~/.bashrc
    ```
 
-## Commands
+#### Commands
 
-### `gwtadd <branch-name>`
+##### `gwtadd <branch-name>`
 
 Creates a new worktree for the specified branch.
 
@@ -66,7 +73,7 @@ gwtadd new-feature
 - Automatically changes your terminal to the new folder
 - If the branch doesn't exist, creates it from the main branch
 
-### `gwtremove`
+##### `gwtremove`
 
 Removes the current worktree and switches back to the main branch folder.
 
@@ -87,9 +94,9 @@ gwtremove --force
 - Removes the worktree folder and git references
 - Changes your terminal to the main branch folder
 
-## Quick Start Guide
+#### Quick Start Guide
 
-### First Time Setup
+##### First Time Setup
 
 1. Navigate to your existing Git repository:
 
@@ -121,7 +128,7 @@ gwtremove --force
    # You can work here while keeping your feature branch work intact
    ```
 
-### Daily Workflow
+##### Daily Workflow
 
 ```bash
 # Start working on a new feature
@@ -134,9 +141,9 @@ gwtremove
 # Terminal switches back to main branch folder
 ```
 
-## Development
+#### Development
 
-### Available Scripts
+##### Available Scripts
 
 ```bash
 # Type check all TypeScript files
@@ -149,7 +156,7 @@ pnpm lint
 pnpm lint:fix
 ```
 
-### How It Works
+##### How It Works
 
 The scripts use a hybrid approach:
 
