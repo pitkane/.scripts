@@ -107,6 +107,34 @@ _gwtadd() {
 # This tells zsh to use _gwtadd function when tab-completing gwtadd command
 compdef _gwtadd gwtadd
 
+# Tab completion for gwtremove command
+# Provides completion for existing worktrees and command flags
+_gwtremove() {
+    local context state line
+    
+    # Define the completion specification
+    _arguments \
+        '(-f --force)'{-f,--force}'[force removal without confirmation]' \
+        '*::worktree:->worktrees'
+    
+    # Handle the worktrees context
+    case $state in
+        worktrees)
+            # Get list of existing worktrees (excluding main worktree)
+            local worktrees
+            worktrees=($(git worktree list 2>/dev/null | awk 'NR>1 {print $1}' | xargs -I {} basename {} 2>/dev/null))
+            
+            # Provide completions for existing worktrees
+            if [ ${#worktrees[@]} -gt 0 ]; then
+                _describe 'existing worktrees' worktrees
+            fi
+            ;;
+    esac
+}
+
+# Register the completion function for the gwtremove command
+compdef _gwtremove gwtremove
+
 # Git worktree remove function - TypeScript wrapper
 # This function removes the current worktree and returns to main repository
 gwtremove() {
