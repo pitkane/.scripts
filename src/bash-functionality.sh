@@ -6,6 +6,36 @@
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")" && pwd)"
 
+# Function to detect package manager and return appropriate runner command
+detect_package_manager() {
+    # Check for pnpm-lock.yaml first (most specific)
+    if [ -f "pnpm-lock.yaml" ]; then
+        echo "pnpx"
+        return
+    fi
+    
+    # Check for package-lock.json (npm)
+    if [ -f "package-lock.json" ]; then
+        echo "npx"
+        return
+    fi
+    
+    # Check for yarn.lock
+    if [ -f "yarn.lock" ]; then
+        echo "yarn dlx"
+        return
+    fi
+    
+    # Check for bun.lockb
+    if [ -f "bun.lockb" ]; then
+        echo "bunx"
+        return
+    fi
+    
+    # Default to npx if no lock files found
+    echo "npx"
+}
+
 # Unalias any existing gwtadd command to avoid conflicts
 unalias gwtadd 2>/dev/null
 
@@ -22,9 +52,13 @@ gwtadd() {
     # Store the current directory to return to if the TypeScript script fails
     original_dir=$(pwd)
     
+    # Detect package manager and get appropriate runner
+    local package_runner
+    package_runner=$(detect_package_manager)
+    
     # Call the TypeScript implementation and capture output
     local output
-    output=$(pnpx tsx "$SCRIPT_DIR/git-worktree-add.ts" "$@" 2>&1)
+    output=$($package_runner tsx "$SCRIPT_DIR/git-worktree-add.ts" "$@" 2>&1)
     local exit_code=$?
     
     if [ $exit_code -eq 0 ]; then
@@ -55,9 +89,13 @@ gwtadd() {
 # Tab completion for gwtadd command
 # Uses TypeScript implementation for intelligent completion
 _gwtadd() {
+    # Detect package manager and get appropriate runner
+    local package_runner
+    package_runner=$(detect_package_manager)
+    
     # Get completion options from TypeScript script
     local completions
-    completions=(${(f)"$(pnpx tsx "$SCRIPT_DIR/git-worktree-completion.ts" 2>/dev/null)"})
+    completions=(${(f)"$($package_runner tsx "$SCRIPT_DIR/git-worktree-completion.ts" 2>/dev/null)"})
     
     # Provide completions for the gwtadd command
     if [ ${#completions[@]} -gt 0 ]; then
@@ -81,11 +119,15 @@ gwtremove() {
     # Store the current directory to return to if the TypeScript script fails
     original_dir=$(pwd)
     
+    # Detect package manager and get appropriate runner
+    local package_runner
+    package_runner=$(detect_package_manager)
+    
     # Call the TypeScript implementation with proper TTY handling
     local output
     if [ -n "$force_flag" ]; then
         # Force mode - no interaction needed
-        output=$(pnpx tsx "$SCRIPT_DIR/git-worktree-remove.ts" $force_flag 2>&1)
+        output=$($package_runner tsx "$SCRIPT_DIR/git-worktree-remove.ts" $force_flag 2>&1)
     else
         # Interactive mode - get main branch worktree path before removal
         local main_branch_path
@@ -106,7 +148,7 @@ gwtremove() {
         fi
         
         # Run the TypeScript script directly for interactive prompts
-        pnpx tsx "$SCRIPT_DIR/git-worktree-remove.ts"
+        $package_runner tsx "$SCRIPT_DIR/git-worktree-remove.ts"
         local exit_code=$?
         
         # If successful and we have a main branch path, change to it
